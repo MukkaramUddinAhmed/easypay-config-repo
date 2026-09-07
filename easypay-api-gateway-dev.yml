@@ -1,0 +1,97 @@
+# Server Port Setup
+# Ye batata hai ki Gateway local machine par kis port par run hoga.
+server:
+  port: 8080 # Sabhi incoming requests http://localhost:8080 par aayengi
+
+spring:
+  # Microservice Identity
+  # Iska naam Eureka Server aur Config Server mein register hoga.
+  application:
+    name: easypay-api-gateway
+
+  # Active Profile Setup
+  # Abhi 'dev' (Development) environment active hai.
+  profiles:
+    active:
+      - dev
+
+  # OAuth2 & Security Configuration
+  # Gateway JWT token validation ke liye Resource Server ki tarah kaam karta hai.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Auth Service ka URI jahan se Gateway public keys (JWKS) fetch karega
+          # aur incoming requests ke JWT token signature ko verify karega.
+          jwk-set-uri: http://localhost:9000/oauth2/jwks
+
+  # Redis Database Setup
+  # Rate Limiter (Request limits) ka data Redis cache mein store hoga.
+  data:
+    redis:
+      host: localhost # Redis server ka host address
+      port: 6379      # Redis ka default port
+
+  # Spring Cloud Gateway Routing & Filters Setup
+  cloud:
+    gateway:
+      # Global Filters: Ye filters har ek request par apply honge.
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            # Replenish Rate: Har second Redis bucket mein kitne naye tokens add honge (Average speed).
+            redis-rate-limiter.replenishRate: 5
+            # Burst Capacity: Ek hi second mein maximum kitni requests allow hongi.
+            redis-rate-limiter.burstCapacity: 10
+
+      # Routes Configuration: Downstream services ke liye routing rules.
+      routes:
+        # ----------------------------------------------------------------------
+        # ROUTE 1: Account Service Routing
+        # ----------------------------------------------------------------------
+        - id: easypay-account-service
+          # lb:// = Load Balanced URI (Eureka Registry se IP aur port dhundega)
+          uri: lb://easypay-account-service
+          predicates:
+            # Matcher: Agar URL `/api/accounts/` se start hota hai
+            - Path=/api/accounts/**
+          filters:
+            # StripPrefix=1: Pehla path segment (`/api`) hata dega
+            # Request downstream ko `/accounts/**` ke roop mein jayegi.
+            - StripPrefix=1
+
+        # ----------------------------------------------------------------------
+        # ROUTE 2: Transaction Service Routing (With Circuit Breaker)
+        # ----------------------------------------------------------------------
+        - id: easypay-transaction-service
+          uri: lb://easypay-transaction-service
+          predicates:
+            - Path=/api/transaction/**
+          filters:
+            - StripPrefix=1
+            # Circuit Breaker Filter (Resilience4j)
+            - name: CircuitBreaker
+              args:
+                name: transactionCB
+                # Agar Transaction Service down ho jaye ya response mein delay ho,
+                # toh request is fallback URI par forward ho jayegi.
+                fallbackUri: forward:/fallback/transaction
+
+# Service Discovery Setup (Eureka Client)
+# API Gateway apne aap ko Eureka Server ke saath register karega.
+eureka:
+  client:
+    service-url:
+      # Eureka Server ka URL (CamelCase mein defaultZone likhna zaroori hai)
+      defaultZone: http://localhost:8761/eureka
+
+# Spring Boot Actuator & Monitoring
+# Application ki health aur metrics monitor karne ke liye endpoints open karna.
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health     # Service ki health status check karne ke liye
+          - info       # Application info ke liye
+          - prometheus # Prometheus monitoring metrics ke liye
