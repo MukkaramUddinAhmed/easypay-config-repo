@@ -70,6 +70,10 @@ spring:
                 # Agar Transaction Service down ho jaye ya response mein delay ho,
                 # toh request is fallback URI par forward ho jayegi.
                 fallbackUri: forward:/fallback/transaction
+        - id: easypay-auth-server
+          uri: lb//easypay-auth-server
+          predicates:
+            - Path=/auth/**,/oauth2/**
 
 # Service Discovery Setup (Eureka Client)
 # API Gateway apne aap ko Eureka Server ke saath register karega.
