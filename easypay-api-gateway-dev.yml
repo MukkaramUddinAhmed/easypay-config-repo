@@ -9,12 +9,6 @@ spring:
   application:
     name: easypay-api-gateway
 
-  # Active Profile Setup
-  # Abhi 'dev' (Development) environment active hai.
-  profiles:
-    active:
-      - dev
-
   # OAuth2 & Security Configuration
   # Gateway JWT token validation ke liye Resource Server ki tarah kaam karta hai.
   security:
