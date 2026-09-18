@@ -71,7 +71,7 @@ spring:
                 # toh request is fallback URI par forward ho jayegi.
                 fallbackUri: forward:/fallback/transaction
         - id: easypay-auth-server
-          uri: lb//easypay-auth-server
+          uri: lb://easypay-auth-server
           predicates:
             - Path=/auth/**,/oauth2/**
 
