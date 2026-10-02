@@ -74,6 +74,12 @@ spring:
           uri: lb://easypay-auth-server
           predicates:
             - Path=/auth/**,/oauth2/**
+        - id: easypay-customer-service
+          uri: lb://easypay-customer-service
+          predicates:
+            - Path=/api/customers/**
+          filters:
+            - StripPrefix=1
 
 # Service Discovery Setup (Eureka Client)
 # API Gateway apne aap ko Eureka Server ke saath register karega.
