@@ -60,7 +60,7 @@ spring:
         - id: easypay-transaction-service
           uri: lb://easypay-transaction-service
           predicates:
-            - Path=/api/transaction/**
+            - Path=/api/transactions/**
           filters:
             - StripPrefix=1
             # Circuit Breaker Filter (Resilience4j)
