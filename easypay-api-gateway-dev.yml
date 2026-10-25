@@ -37,7 +37,7 @@ spring:
             redis-rate-limiter.replenishRate: 1
             # Burst Capacity: Ek hi second mein maximum kitni requests allow hongi.
             redis-rate-limiter.burstCapacity: 10
-            key-resolver: "${@userKeyResolver}"
+            key-resolver: "#{@userKeyResolver}"
 
       # Routes Configuration: Downstream services ke liye routing rules.
       routes:
