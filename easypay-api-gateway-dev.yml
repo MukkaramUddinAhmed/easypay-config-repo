@@ -34,7 +34,7 @@ spring:
         - name: RequestRateLimiter
           args:
             # Replenish Rate: Har second Redis bucket mein kitne naye tokens add honge (Average speed).
-            redis-rate-limiter.replenishRate: 1
+            redis-rate-limiter.replenishRate: 0
             # Burst Capacity: Ek hi second mein maximum kitni requests allow hongi.
             redis-rate-limiter.burstCapacity: 10
             key-resolver: "#{@userKeyResolver}"
